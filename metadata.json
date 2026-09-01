@@ -1,0 +1,6 @@
+{
+  "name": "AirBeam Share",
+  "description": "Zero-network optical file sharing app that transfers files, photos, and notes via animated QR code series with live real-time progress tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
