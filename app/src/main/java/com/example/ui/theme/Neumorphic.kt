@@ -1,6 +1,7 @@
 package com.example.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
@@ -13,15 +14,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Custom Compose Modifier that renders soft top-left light and bottom-right dark shadows
- * to give UI components a distinct, tactile Neumorphic (Soft UI) extruded look.
+ * Custom Compose Modifier that renders soft top-left specular highlight and bottom-right shadow
+ * tailored for both dark obsidian surfaces and light minimal surfaces.
  */
+@Composable
 fun Modifier.neumorphicShadow(
     shape: Shape = RoundedCornerShape(20.dp),
-    lightShadowColor: Color = Color(0xFFFFFFFF),
-    darkShadowColor: Color = Color(0xFFA3B1C6),
+    lightShadowColor: Color = AppTheme.colors.neumorphicLightShadow,
+    darkShadowColor: Color = AppTheme.colors.neumorphicDarkShadow,
     blurRadius: Dp = 8.dp,
-    offset: Dp = 5.dp
+    offset: Dp = 4.dp
 ): Modifier = this.drawBehind {
     val shadowRadiusPx = blurRadius.toPx()
     val offsetPx = offset.toPx()
@@ -38,7 +40,7 @@ fun Modifier.neumorphicShadow(
         }
         canvas.drawOutline(outline, darkPaint)
 
-        // Top-left soft light shadow
+        // Top-left soft light specular highlight
         val lightPaint = Paint().apply {
             color = lightShadowColor
             asFrameworkPaint().apply {

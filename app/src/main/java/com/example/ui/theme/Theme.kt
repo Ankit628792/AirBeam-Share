@@ -1,58 +1,87 @@
 package com.example.ui.theme
 
 import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val AirBeamSoftColorScheme = lightColorScheme(
-    primary = ImmersiveLavender,
+private val DarkColorScheme = darkColorScheme(
+    primary = DarkCyberIndigo,
     onPrimary = Color.White,
-    primaryContainer = ImmersivePurpleContainer,
-    onPrimaryContainer = ImmersiveOnPurpleContainer,
-    secondary = ImmersiveLavender,
+    primaryContainer = DarkIndigoContainer,
+    onPrimaryContainer = DarkOnIndigoContainer,
+    secondary = DarkNeonCyan,
+    onSecondary = Color.Black,
+    secondaryContainer = DarkNeonCyanContainer,
+    onSecondaryContainer = DarkNeonCyan,
+    tertiary = DarkEmeraldGreen,
+    onTertiary = Color.Black,
+    background = DarkObsidianBackground,
+    onBackground = DarkTextPrimary,
+    surface = DarkObsidianSurface,
+    onSurface = DarkTextPrimary,
+    surfaceVariant = DarkObsidianVariant,
+    onSurfaceVariant = DarkTextSecondary,
+    outline = DarkVectorBorder,
+    error = DarkRose,
+    onError = Color.Black
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = LightCyberIndigo,
+    onPrimary = Color.White,
+    primaryContainer = LightIndigoContainer,
+    onPrimaryContainer = LightOnIndigoContainer,
+    secondary = LightNeonCyan,
     onSecondary = Color.White,
-    secondaryContainer = ImmersivePurpleContainer,
-    onSecondaryContainer = ImmersiveOnPurpleContainer,
-    tertiary = EmeraldGreen,
+    secondaryContainer = LightNeonCyanContainer,
+    onSecondaryContainer = LightNeonCyan,
+    tertiary = LightEmeraldGreen,
     onTertiary = Color.White,
-    background = DarkBackground,
-    onBackground = TextPrimary,
-    surface = DarkSurface,
-    onSurface = TextPrimary,
-    surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = TextSecondary,
-    outline = ImmersiveBorder,
-    error = RoseError,
+    background = LightSoftBackground,
+    onBackground = LightTextPrimary,
+    surface = LightSoftSurface,
+    onSurface = LightTextPrimary,
+    surfaceVariant = LightSoftVariant,
+    onSurfaceVariant = LightTextSecondary,
+    outline = LightVectorBorder,
+    error = LightRose,
     onError = Color.White
 )
 
 @Composable
 fun AirBeamTheme(
-    darkTheme: Boolean = false,
+    darkTheme: Boolean = true, // Default to dark theme as requested
     content: @Composable () -> Unit
 ) {
-    val colorScheme = AirBeamSoftColorScheme
+    val airBeamColors = if (darkTheme) DarkAirBeamColors else LightAirBeamColors
+    val materialColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
-            window.navigationBarColor = colorScheme.surface.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = true
+            window.statusBarColor = airBeamColors.background.toArgb()
+            window.navigationBarColor = airBeamColors.surface.toArgb()
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalAirBeamColors provides airBeamColors) {
+        MaterialTheme(
+            colorScheme = materialColorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

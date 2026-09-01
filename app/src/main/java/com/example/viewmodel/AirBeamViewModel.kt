@@ -115,6 +115,18 @@ class AirBeamViewModel(application: Application) : AndroidViewModel(application)
 
     val historyRecords: StateFlow<List<TransferRecord>>
 
+    // Theme State (Defaulting to Dark Theme)
+    private val _isDarkTheme = MutableStateFlow(true)
+    val isDarkTheme: StateFlow<Boolean> = _isDarkTheme.asStateFlow()
+
+    fun toggleDarkTheme() {
+        _isDarkTheme.value = !_isDarkTheme.value
+    }
+
+    fun setDarkTheme(enabled: Boolean) {
+        _isDarkTheme.value = enabled
+    }
+
     // Transfer Speed Mode
     private val _speedMode = MutableStateFlow(TransferSpeedMode.TURBO_12_MBPS)
     val speedMode: StateFlow<TransferSpeedMode> = _speedMode.asStateFlow()

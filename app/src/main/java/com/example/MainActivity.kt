@@ -8,27 +8,39 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CallMade
 import androidx.compose.material.icons.filled.CallReceived
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -39,25 +51,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.ui.components.VectorShieldBadge
 import com.example.ui.screens.AboutScreen
 import com.example.ui.screens.FileManagerScreen
 import com.example.ui.screens.ReceiveScreen
 import com.example.ui.screens.SendScreen
 import com.example.ui.theme.AirBeamTheme
-import com.example.ui.theme.DarkBackground
-import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.EmeraldGreen
-import com.example.ui.theme.ImmersiveLavender
-import com.example.ui.theme.ImmersivePurpleContainer
-import com.example.ui.theme.TextMuted
-import com.example.ui.theme.TextPrimary
+import com.example.ui.theme.AppTheme
 import com.example.ui.theme.neumorphicShadow
 import com.example.viewmodel.AirBeamViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Send : Screen("send", "Send", Icons.Default.CallMade)
     object Receive : Screen("receive", "Receive", Icons.Default.CallReceived)
-    object Files : Screen("files", "Files", Icons.Default.Folder)
+    object Files : Screen("files", "Vault", Icons.Default.Folder)
     object About : Screen("about", "About", Icons.Default.Info)
 }
 
@@ -70,7 +77,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            AirBeamTheme {
+            val isDarkTheme by viewModel.isDarkTheme.collectAsState()
+            AirBeamTheme(darkTheme = isDarkTheme) {
                 AirBeamMainApp(viewModel = viewModel)
             }
         }
@@ -81,6 +89,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AirBeamMainApp(viewModel: AirBeamViewModel) {
     val navController = rememberNavController()
+    val isDarkTheme by viewModel.isDarkTheme.collectAsState()
+
     val items = listOf(
         Screen.Send,
         Screen.Receive,
@@ -94,36 +104,78 @@ fun AirBeamMainApp(viewModel: AirBeamViewModel) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackground),
+            .background(AppTheme.colors.background),
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "AirBeam",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black,
-                        color = ImmersiveLavender
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        VectorShieldBadge(size = 26.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "AirBeam",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black,
+                            color = AppTheme.colors.textPrimary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkBackground,
-                    titleContentColor = ImmersiveLavender
+                    containerColor = AppTheme.colors.background,
+                    titleContentColor = AppTheme.colors.textPrimary
                 ),
                 actions = {
-                    Text(
-                        text = "0% Network",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = EmeraldGreen,
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
+                    // Minimal 0% Network Badge
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = AppTheme.colors.emeraldGreen.copy(alpha = 0.15f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            AppTheme.colors.emeraldGreen.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.WifiOff,
+                                contentDescription = null,
+                                tint = AppTheme.colors.emeraldGreen,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "0% Net",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = AppTheme.colors.emeraldGreen
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    // Dark / Light Theme Toggle Button
+                    IconButton(
+                        onClick = { viewModel.toggleDarkTheme() },
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isDarkTheme) "Switch to Light Mode" else "Switch to Dark Mode",
+                            tint = if (isDarkTheme) AppTheme.colors.neonCyan else AppTheme.colors.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = DarkSurface,
-                contentColor = TextPrimary,
+                containerColor = AppTheme.colors.surface,
+                contentColor = AppTheme.colors.textPrimary,
                 modifier = Modifier
                     .navigationBarsPadding()
                     .neumorphicShadow(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
@@ -159,7 +211,7 @@ fun AirBeamMainApp(viewModel: AirBeamViewModel) {
                             Icon(
                                 imageVector = screen.icon,
                                 contentDescription = screen.title,
-                                tint = if (selected) ImmersiveLavender else TextMuted
+                                tint = if (selected) AppTheme.colors.primary else AppTheme.colors.textMuted
                             )
                         },
                         label = {
@@ -167,17 +219,17 @@ fun AirBeamMainApp(viewModel: AirBeamViewModel) {
                                 text = screen.title,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selected) ImmersiveLavender else TextMuted
+                                color = if (selected) AppTheme.colors.primary else AppTheme.colors.textMuted
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = ImmersivePurpleContainer
+                            indicatorColor = AppTheme.colors.primaryContainer
                         )
                     )
                 }
             }
         },
-        containerColor = DarkBackground
+        containerColor = AppTheme.colors.background
     ) { innerPadding ->
         Box(
             modifier = Modifier
